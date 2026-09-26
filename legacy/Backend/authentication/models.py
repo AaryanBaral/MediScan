@@ -1,0 +1,113 @@
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
+from django.utils.translation import gettext_lazy as _
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, role=None, specialization=None, **extra_fields):
+        if not email:
+            raise ValueError(_('The Email must be set'))
+        if not role:
+            raise ValueError(_('The Role must be set'))
+        email = self.normalize_email(email)
+        user = self.model(
+            email=email, 
+            role=role.upper(), 
+            specialization=specialization,
+            **extra_fields
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('role', 'ADMIN')
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError(_('Superuser must have is_staff=True.'))
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError(_('Superuser must have is_superuser=True.'))
+
+        return self.create_user(email, password, **extra_fields)
+
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = (
+        ('DOCTOR', 'Doctor'),
+        ('PATIENT', 'Patient'),
+        ('ADMIN', 'Admin'),
+    )
+
+    STATUS_UNVERIFIED = 'UNVERIFIED'
+    STATUS_PENDING = 'PENDING'
+    STATUS_VERIFIED = 'VERIFIED'
+    STATUS_REJECTED = 'REJECTED'
+
+    DOCTOR_STATUS_CHOICES = (
+        (STATUS_UNVERIFIED, 'Unverified'),
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_VERIFIED, 'Verified'),
+        (STATUS_REJECTED, 'Rejected'),
+    )
+
+    SPECIALIZATION_CHOICES = (
+        ('CARDIOLOGIST', 'Cardiologist (Heart)'),
+        ('ENDOCRINOLOGIST', 'Endocrinologist (Diabetes & Thyroid)'),
+        ('NEPHROLOGIST', 'Nephrologist (Kidney)'),
+        ('HEPATOLOGIST', 'Hepatologist (Liver)'),
+        ('HEMATOLOGIST', 'Hematologist (Anemia)'),
+    )
+
+    username = None  # Disable username field
+    email = models.EmailField(_('email address'), unique=True)
+    
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    date_of_birth = models.DateField(null=True, blank=True)
+    phone_number = PhoneNumberField(unique=True, null=True, blank=True)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='PATIENT')
+    specialization = models.CharField(
+        max_length=50, 
+        choices=SPECIALIZATION_CHOICES, 
+        null=True, 
+        blank=True
+    )
+    
+    is_verified = models.BooleanField(default=False)
+    doctor_status = models.CharField(
+        max_length=20, 
+        choices=DOCTOR_STATUS_CHOICES, 
+        default=STATUS_UNVERIFIED
+    )
+    failed_login_attempts = models.IntegerField(default=0)
+    account_locked_until = models.DateTimeField(null=True, blank=True)
+    
+    # Pricing & Professional Info
+    consultation_fee = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.00,
+        help_text=_("Consultation fee per appointment")
+    )
+    experience = models.PositiveIntegerField(
+        default=0,
+        help_text=_("Years of professional experience")
+    )
+    bio = models.TextField(
+        null=True, 
+        blank=True,
+        help_text=_("Professional biography and expertise")
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'role']
+
+    def __str__(self):
+        return self.email

@@ -1,0 +1,69 @@
+# --- secrets & local config (never committed) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+dist/
+build/
+*.egg-info/
+
+# --- node ---
+node_modules/
+apps/web/dist/
+apps/web/.vite/
+
+# --- data & artifacts (live in object storage, never in git) ---
+ml/data/**
+!ml/data/README.md
+!ml/data/.gitkeep
+ml/dist/
+ml/golden_set/pdfs/**
+!ml/golden_set/pdfs/README.md
+*.pkl
+*.joblib
+*.faiss
+*.onnx
+
+# --- infra ---
+infra/.volumes/
+
+# --- os / editor ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- legacy tree (kept for reference during migration; same rules as before) ---
+legacy/**/.env
+legacy/ML/datasets/
+legacy/ML/reports/
+legacy/ML/temp_*.pdf
+legacy/ML/garbage.pdf
+legacy/ML/final_benchmark_data.csv
+legacy/ML/benchmark_study.py
+legacy/ML/benchmark_results.csv
+legacy/ML/check_tree.py
+legacy/ML/src/chat_payload.json
+legacy/ML/src/payload.json
+legacy/ML/test_pipeline.txt
+legacy/ML/docker_*.json
+legacy/Backend/db.sqlite3
+legacy/Backend/media/
+legacy/frontend/node_modules/
+legacy/frontend/dist/
+
+# unrelated reference project
+Booking/
+legacy/Backend/reports/*.pdf
+legacy/Backend/doctor_licenses/
