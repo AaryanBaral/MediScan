@@ -5,6 +5,9 @@ MediScan extracts the values, lets the patient verify them, checks for critical 
 risk with versioned models, explains the result in plain language with cited clinical guidelines, and
 connects the patient with a verified doctor for a paid consultation.
 
+
+
+
 > **Version note.** This is **v2**, a ground-up re-architecture. The previous implementation (v1, the
 > final-year project) lives read-only in [`legacy/`](legacy/) and is being ported into this structure
 > capability by capability. If you are looking for the code described in the original project report,
